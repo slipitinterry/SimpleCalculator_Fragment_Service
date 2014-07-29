@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:layout_width="fill_parent"
+    android:layout_height="fill_parent"
+    android:orientation="vertical" >
+
+	 <fragment
+	      android:id="@+id/fragment_top" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content"
+	      class="com.example.simplecalculator_fragment_service.FragmentTop"
+	 />
+	
+	 <fragment
+	      android:id="@+id/fragment_second_term" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content"
+	      class="com.example.simplecalculator_fragment_service.FragmentSecondTerm"
+	 />
+	
+	 	
+ 	<fragment 
+	      android:id="@+id/fragment_operations" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content"
+		  android:name="com.example.simplecalculator_fragment_service.FragmentOperations"
+	/>
+
+	  	
+ 	<fragment 
+	      android:id="@+id/fragment_buttons" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content"
+		  android:name="com.example.simplecalculator_fragment_service.FragmentButtons"
+	/>
+
+ 	<fragment 
+	      android:id="@+id/fragment_result" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content" 
+	      android:name="com.example.simplecalculator_fragment_service.FragmentResult"
+	/>
+
+ 	<fragment 
+	      android:id="@+id/fragment_factorial" 
+	      android:layout_width="wrap_content" 
+	      android:layout_height="wrap_content" 
+	      android:name="com.example.simplecalculator_fragment_service.FragmentFactorial"
+	/>
+
+</LinearLayout>
+	    	    
