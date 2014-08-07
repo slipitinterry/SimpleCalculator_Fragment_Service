@@ -1,6 +1,8 @@
 package com.example.simplecalculator_fragment_service;
 
 
+import java.util.Locale;
+
 import android.content.BroadcastReceiver;
 import android.content.ComponentName;
 import android.content.Context;
@@ -9,6 +11,8 @@ import android.content.ServiceConnection;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.speech.tts.TextToSpeech;
+import android.speech.tts.TextToSpeech.OnInitListener;
 import android.support.v4.app.Fragment;
 import android.support.v4.app.FragmentActivity;
 import android.support.v4.app.FragmentManager;
@@ -22,11 +26,18 @@ import android.widget.TextView;
 import android.widget.Toast;
 
 public class MainActivity extends FragmentActivity 
-						  implements FragmentOperations.OnButtonClickListener {
+						  implements FragmentOperations.OnButtonClickListener,
+						  OnInitListener {
 
 	private String operation;
 	private boolean bRegistered = false;
 	
+	private TextToSpeech mTts; // Instance of Text to Speech engine
+	private int MY_DATA_CHECK_CODE = 1701;
+	private boolean mTTS_available = false;
+	
+	private boolean mCalFactorial = false;
+
 	// keep a reference to our service
 	private FactorialService factServiceBinder;
 	
@@ -67,6 +78,10 @@ public class MainActivity extends FragmentActivity
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
 		setContentView(R.layout.activity_main);
+
+        // startup the Text to Speech engine
+        Intent checkIntent = new Intent(TextToSpeech.Engine.ACTION_CHECK_TTS_DATA);
+        startActivityForResult(checkIntent, MY_DATA_CHECK_CODE);
 
 		// TODO:
 		// Try using the Fragment Manager to detach the fragments we don't want to
@@ -287,6 +302,40 @@ public class MainActivity extends FragmentActivity
 		Toast.makeText(getApplicationContext(), 
 						toastString,
 						Toast.LENGTH_LONG).show();
+		
+		if(mTTS_available){
+			EditText editNum1 = (EditText)findViewById(R.id.editNumber1);
+			EditText editNum2 = (EditText)findViewById(R.id.editNumber2);
+			TextView txtOperation = (TextView)findViewById(R.id.textOperation);
+
+			String strNum1 = editNum1.getText().toString();
+			String strOpp = txtOperation.getText().toString();
+			String strNum2 = editNum2.getText().toString();
+			
+			String strOp = "unknown operation";
+			if (strOpp.compareToIgnoreCase("-") == 0){
+				strOp = "minus";
+			}
+			else if (strOpp.compareToIgnoreCase("+") == 0){
+				strOp = "plus";
+			}
+			else if (strOpp.compareToIgnoreCase("*") == 0){
+				strOp = "times";
+			}
+			else if (strOpp.compareToIgnoreCase("/") == 0){
+				strOp = "divided by";
+			}
+
+			String speakString = strNum1 + " " + strOp  + " " + strNum2 + " " + " equals " + strResult;
+
+			if(mCalFactorial){
+				speakString = "The factorial of " + strNum1 + " is " + strResult;
+			}
+			mTts.setLanguage(Locale.UK);
+			mTts.speak(speakString, TextToSpeech.QUEUE_ADD, null);
+		}
+		
+		mCalFactorial = false;
 	}
 	
 	
@@ -341,6 +390,7 @@ public class MainActivity extends FragmentActivity
 	 * @param v
 	 */
 	public void calcFactorial(View v){
+		mCalFactorial = true;
 		EditText editNum1 = (EditText)findViewById(R.id.editNumber1);
 		String strNum1 = editNum1.getText().toString();
 
@@ -377,7 +427,7 @@ public class MainActivity extends FragmentActivity
 
 		Log.d("MainActivity", "calcFactorialService:");
 
-		
+		mCalFactorial = true;
 		EditText editNum1 = (EditText)findViewById(R.id.editNumber1);
 		String strNum1 = editNum1.getText().toString();
 
@@ -401,6 +451,39 @@ public class MainActivity extends FragmentActivity
 			
 		}
 		
+	}
+
+    /**
+     *
+     * Respond to startActivityForResult() call to setup Text to Speech
+     *
+     */
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+
+        // Decide what to do based on the original request code
+        if (requestCode == MY_DATA_CHECK_CODE) {
+            if (resultCode == TextToSpeech.Engine.CHECK_VOICE_DATA_PASS) {
+                // success, create the TTS instance
+                mTts = new TextToSpeech(getApplicationContext(), this);
+            } else {
+                // missing data, install it
+                Intent installIntent = new Intent();
+                installIntent.setAction(TextToSpeech.Engine.ACTION_INSTALL_TTS_DATA);
+                startActivity(installIntent);
+            }
+        }
+
+    }
+
+	@Override
+	public void onInit(int status) {
+        if(status == TextToSpeech.SUCCESS){
+            mTTS_available = true;
+        }
+        else{
+            mTTS_available = false;
+        }
 	}
 
 }
